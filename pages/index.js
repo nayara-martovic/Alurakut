@@ -20,21 +20,69 @@ function ProfileSidebar(props) {
   )
 }
 
+function ProfileRelationsBox(props){
+  return (
+    <ProfileRelationsBoxWrapper>
+      <h2 className="smallTitle">{props.title} ({props.list.length})</h2>
+      <ul>
+        {props.list.map((item) => {
+          return (
+            <li key={item.id}>
+              <a href={`${props.href}${item.title}`}>
+                <img src={item.image} />
+                <span>{item.title}</span>
+              </a>
+            </li>
+          )
+        })}
+      </ul>
+    </ProfileRelationsBoxWrapper>
+  );
+}
+
 export default function Home() {
   const usuario = 'nayara-martovic';
-  const [comunidades, setComunidades] = React.useState([{
-    id: '48748937843789', 
-    title: 'Eu odeio acordar cedo',
-    image: 'https://alurakut.vercel.app/capa-comunidade-01.jpg'
-  }]);
-  const pessoasFavoritas = [
-    'SamukaM',
-    'juunegreiros',
-    'omariosouto',
-    'peas',
-    'rafaballerini',
+  const [comunidades, setComunidades] = React.useState([]);
+  const [seguidores, setSeguidores] = React.useState([]);
+
+  const amigos = [
+    {
+      title: 'SamukaM',
+      image: 'https://github.com/SamukaM.png'
+    },
+    {
+      title: 'omariosouto',
+      image: 'https://github.com/omariosouto.png',
+    },
+    {
+      title: 'juunegreiros',
+      image: 'https://github.com/juunegreiros.png',
+    },
+    {
+      title: 'peas',
+      image: 'https://github.com/peas.png',
+    },
+    {
+      title: 'rafaballerini',
+      image: 'https://github.com/rafaballerini.png',
+    }
     //'marcobrunodev','felipefialho',
-  ]
+  ];
+
+  React.useEffect(() => {
+    fetch('https://api.github.com/users/nayara-martovic/followers')
+    .then(res => res.json())
+    .then(res => {
+      const jsonList = res.map(item => {
+        return {
+          title: item.login,
+          image: item.avatar_url
+        }
+      });
+
+      setSeguidores(jsonList);
+    });
+  }, []); // o array vazio indica q o codigo sera executado apenas uma vez
 
   return (
     <>
@@ -84,37 +132,22 @@ export default function Home() {
           </Box>
         </div>
         <div className="profileRelationsArea" style={{ gridArea: 'profileRelationsArea' }}>
-          <ProfileRelationsBoxWrapper>
-              <h2 className="smallTitle">Meus Amigos ({pessoasFavoritas.length})</h2>
-              <ul>
-                {pessoasFavoritas.map((itemAtual) => {
-                  return (
-                    <li key={itemAtual}>
-                      <a href={`/users/${itemAtual}`}>
-                        <img src={`https://github.com/${itemAtual}.png`} />
-                        <span>{itemAtual}</span>
-                      </a>
-                    </li>
-                  )
-                })}
-              </ul>
-            </ProfileRelationsBoxWrapper>
-            <ProfileRelationsBoxWrapper>
-              <h2 className="smallTitle">Minhas Comunidades ({comunidades.length})</h2>
-              <ul>
-                {comunidades.map((comunidade) => {
-                  return (
-                    <li key={comunidade.id}>
-                      <a href={`/users/${comunidade.title}`}>
-                        <img src={comunidade.image} />
-                        <span>{comunidade.title}</span>
-                      </a>
-                    </li>
-                  )
-                })}
-              </ul>
-            </ProfileRelationsBoxWrapper>
-          </div>
+          <ProfileRelationsBox 
+            title="Meus Seguidores"
+            list={seguidores}
+            href="/followers/"
+          />
+          <ProfileRelationsBox 
+            title="Meus Amigos"
+            list={amigos}
+            href="/users/"
+          />
+          <ProfileRelationsBox 
+            title="Minhas Comunidades"
+            list={comunidades}
+            href="/communities/"
+          />
+        </div>
       </MainGrid>
     </>
   )
