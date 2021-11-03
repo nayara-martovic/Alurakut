@@ -8,10 +8,11 @@ import {
 import ProfileRelationsBox from "../src/components/ProfileRelations";
 import ProfileSidebar from "../src/components/ProfileSidebar";
 import CommunityForm from "../src/components/CommunityForm";
-import UserService from "../src/Services";
+import UserService from "../src/Services/UserService";
+import AuthService from "../src/Services/AuthService";
 
-export default function Home() {
-  const [user, setUser] = React.useState({ userName: "nayara-martovic", name: "", imageUrl: "" });
+export default function Home(props) {
+  const [user, setUser] = React.useState({ userName: props.userName, name: "", imageUrl: "" });
   const [comunidades, setComunidades] = React.useState([]);
   const [seguidores, setSeguidores] = React.useState([]);
   const [amigos, setAmigos] = React.useState([]);
@@ -71,4 +72,23 @@ export default function Home() {
       </MainGrid>
     </>
   );
+}
+
+export async function getServerSideProps(context) {
+  const { isAuthenticated, userName } = await AuthService.getAuth(context);
+
+  if(!isAuthenticated) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      }
+    }
+  }
+
+  return {
+    props: {
+      userName
+    }, // will be passed to the page component as props
+  }
 }
