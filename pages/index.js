@@ -8,22 +8,24 @@ import {
 import ProfileRelationsBox from "../src/components/ProfileRelations";
 import ProfileSidebar from "../src/components/ProfileSidebar";
 import CommunityForm from "../src/components/CommunityForm";
-import Service from "../src/Services";
+import UserService from "../src/Services";
 
 export default function Home() {
-  const usuario = "nayara-martovic";
+  const [user, setUser] = React.useState({ userName: "nayara-martovic", name: "", imageUrl: "" });
   const [comunidades, setComunidades] = React.useState([]);
   const [seguidores, setSeguidores] = React.useState([]);
   const [amigos, setAmigos] = React.useState([]);
 
   React.useEffect(() => {
-    Service.fetchGithubFollowers(usuario).then((followers) =>
+    UserService.fetchGithubUser(user.userName).then(userData => setUser(userData));
+
+    UserService.fetchGithubFollowers(user.userName).then((followers) =>
       setSeguidores(followers)
     );
 
-    Service.fetchGithubFollowing(usuario).then(following => setAmigos(following));
+    UserService.fetchGithubFollowing(user.userName).then(following => setAmigos(following));
 
-    Service.fetchCommunities().then(communities => setComunidades(communities));
+    UserService.fetchCommunities().then(communities => setComunidades(communities));
   }, []); // o array vazio indica q o codigo sera executado apenas uma vez
 
   return (
@@ -32,8 +34,7 @@ export default function Home() {
       <MainGrid>
         <div className="profileArea" style={{ gridArea: "profileArea" }}>
           <ProfileSidebar
-            githubUser={usuario}
-            userPhoto={`https://github.com/${usuario}.png`}
+            user={user}
           />
         </div>
         <div className="welcomeArea" style={{ gridArea: "welcomeArea" }}>

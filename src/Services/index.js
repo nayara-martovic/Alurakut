@@ -1,4 +1,16 @@
-class Service {
+class UserService {
+  fetchGithubUser(userName) {
+    return fetch(`https://api.github.com/users/${userName}`)
+      .then((res) => res.json())
+      .then((res) => {
+        return {
+          userName: res.login,
+          name: res.name,
+          imageUrl: res.avatar_url,
+        };
+      });
+  }
+
   fetchGithubFollowers(userName) {
     return fetch(`https://api.github.com/users/${userName}/followers`)
       .then((res) => res.json())
@@ -51,4 +63,4 @@ class Service {
   }
 }
 
-export default new Service();
+export default new UserService();

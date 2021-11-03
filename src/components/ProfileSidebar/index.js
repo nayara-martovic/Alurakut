@@ -5,13 +5,14 @@ const ProfileSidebar = (props) => {
   return (
     <Box as="aside">
       <img
-        src={props.userPhoto}
+        src={props.user.imageUrl}
         style={{ borderRadius: "8px" }}
       />
       <hr />
+      <h4>{props.user.name}</h4>
       <p>
-        <a className="boxLink" href={`https://github.com/${props.githubUser}`}>
-          @{props.githubUser}
+        <a className="boxLink" href={`https://github.com/${props.user.userName}`}>
+          @{props.user.userName}
         </a>
       </p>
       <hr />
