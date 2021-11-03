@@ -20,6 +20,12 @@ class AuthService {
     });
   }
 
+  logout() {
+    nookies.destroy(null, "USER_TOKEN", {
+      path: "/",
+    });
+  }
+
   async getAuth(context) {
     const cookies = nookies.get(context);
     const token = cookies.USER_TOKEN;

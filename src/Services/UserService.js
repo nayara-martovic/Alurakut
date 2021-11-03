@@ -1,5 +1,5 @@
 class UserService {
-  fetchGithubUser(userName) {
+  getGithubUser(userName) {
     return fetch(`https://api.github.com/users/${userName}`)
       .then((res) => res.json())
       .then((res) => {
@@ -11,7 +11,7 @@ class UserService {
       });
   }
 
-  fetchGithubFollowers(userName) {
+  getGithubFollowers(userName) {
     return fetch(`https://api.github.com/users/${userName}/followers`)
       .then((res) => res.json())
       .then((res) => {
@@ -25,7 +25,7 @@ class UserService {
       });
   }
 
-  fetchGithubFollowing(userName) {
+  getGithubFollowing(userName) {
     return fetch(`https://api.github.com/users/${userName}/following`)
       .then((res) => res.json())
       .then((res) => {
@@ -37,29 +37,6 @@ class UserService {
 
         return jsonList;
       });
-  }
-
-  fetchCommunities() {
-    return fetch("https://graphql.datocms.com/", {
-      method: "POST",
-      headers: {
-        Authorization: "bfa98b2226adb28aea9d378d36adc8",
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({
-        query: `query {
-          allCommunities {
-            id
-            title 
-            imageUrl
-            creatorSlug
-          }
-        }`,
-      }),
-    })
-      .then((res) => res.json())
-      .then((res) => res.data.allCommunities);
   }
 }
 

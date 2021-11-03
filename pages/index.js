@@ -10,33 +10,50 @@ import ProfileSidebar from "../src/components/ProfileSidebar";
 import CommunityForm from "../src/components/CommunityForm";
 import UserService from "../src/Services/UserService";
 import AuthService from "../src/Services/AuthService";
+import CommunityService from "../src/Services/CommunityService";
 
 export default function Home(props) {
-  const [user, setUser] = React.useState({ userName: props.userName, name: "", imageUrl: "" });
-  const [comunidades, setComunidades] = React.useState([]);
-  const [seguidores, setSeguidores] = React.useState([]);
-  const [amigos, setAmigos] = React.useState([]);
+  const [user, setUser] = React.useState({
+    userName: props.userName,
+    name: "",
+    imageUrl: "",
+  });
+  const [communities, setCommunities] = React.useState([]);
+  const [followers, setFollowers] = React.useState([]);
+  const [following, setFollowing] = React.useState([]);
 
   React.useEffect(() => {
-    UserService.fetchGithubUser(user.userName).then(userData => setUser(userData));
-
-    UserService.fetchGithubFollowers(user.userName).then((followers) =>
-      setSeguidores(followers)
+    UserService.getGithubUser(user.userName).then((userData) =>
+      setUser(userData)
     );
 
-    UserService.fetchGithubFollowing(user.userName).then(following => setAmigos(following));
+    UserService.getGithubFollowers(user.userName).then((followersData) =>
+      setFollowers(followersData)
+    );
 
-    UserService.fetchCommunities().then(communities => setComunidades(communities));
+    UserService.getGithubFollowing(user.userName).then((followingData) =>
+      setFollowing(followingData)
+    );
+
+    CommunityService.getAll().then((communitiesData) =>
+      setCommunities(communitiesData)
+    );
   }, []); // o array vazio indica q o codigo sera executado apenas uma vez
+
+  const handleSubmitCommunityForm = (data) => {
+    data.creatorSlug = user.userName;
+
+    CommunityService.create(data).then((createdCommunity) => {
+      setComunidades([...comunidades, createdCommunity]);
+    });
+  };
 
   return (
     <>
       <AlurakutMenu />
       <MainGrid>
         <div className="profileArea" style={{ gridArea: "profileArea" }}>
-          <ProfileSidebar
-            user={user}
-          />
+          <ProfileSidebar user={user} />
         </div>
         <div className="welcomeArea" style={{ gridArea: "welcomeArea" }}>
           <Box>
@@ -46,7 +63,7 @@ export default function Home(props) {
 
           <Box>
             <h2 className="subTitle">O que você deseja fazer?</h2>
-            <CommunityForm />
+            <CommunityForm onSubmit={handleSubmitCommunityForm} />
           </Box>
         </div>
         <div
@@ -55,17 +72,17 @@ export default function Home(props) {
         >
           <ProfileRelationsBox
             title="Seguidores"
-            list={seguidores}
+            list={followers}
             href="/followers/"
           />
           <ProfileRelationsBox
             title="Seguindo"
-            list={amigos}
-            href="/users/"
+            list={following}
+            href="/following/"
           />
           <ProfileRelationsBox
             title="Minhas Comunidades"
-            list={comunidades}
+            list={communities}
             href="/communities/"
           />
         </div>
@@ -77,18 +94,18 @@ export default function Home(props) {
 export async function getServerSideProps(context) {
   const { isAuthenticated, userName } = await AuthService.getAuth(context);
 
-  if(!isAuthenticated) {
+  if (!isAuthenticated) {
     return {
       redirect: {
-        destination: '/login',
+        destination: "/login",
         permanent: false,
-      }
-    }
+      },
+    };
   }
 
   return {
     props: {
-      userName
+      userName,
     }, // will be passed to the page component as props
-  }
+  };
 }

@@ -1,22 +1,11 @@
-const CommunityForm = () => {
+const CommunityForm = ({ onSubmit }) => {
   const handleCriaComunidade = (ev) => {
     ev.preventDefault();
-    const dadosDoForm = new FormData(ev.target);
-    const corpo = {
-      title: dadosDoForm.get("title"),
-      imageUrl: dadosDoForm.get("image"),
-      creatorSlug: "nayara-martovic",
-    };
 
-    fetch("/api/comunidades", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(corpo),
-    }).then(async (res) => {
-      const dados = await res.json();
-      // setComunidades([...comunidades, dados.data]);
+    const data = new FormData(ev.target);
+    onSubmit({
+      title: data.get("title"),
+      imageUrl: data.get("image"),
     });
   };
 
