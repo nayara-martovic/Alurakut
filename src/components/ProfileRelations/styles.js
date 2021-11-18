@@ -2,6 +2,20 @@ import styled from 'styled-components';
 import Box from '../Box';
 
 export const ProfileRelationsBoxWrapper = styled(Box)`
+  .actions {
+    margin-top: 0.5rem;
+    display: flex;
+    justify-content: center;
+
+    a {
+      color: #6F92BB;
+      border: 1px solid #6F92BB;
+      background-color: transparent;
+      padding: 8px 12px;
+      border-radius: 10000px;
+      text-decoration: none;
+    }
+  }
   ul {
     display: grid;
     grid-gap: 8px;

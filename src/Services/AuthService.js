@@ -33,7 +33,10 @@ class AuthService {
     const isAuthenticated = this._getIsAuthenticated(token);
     if (!isAuthenticated) return { isAuthenticated };
 
-    const { githubUser } = jwt.decode(token);
+    const response = jwt.decode(token);
+    if(!response) return { isAuthenticated: false };
+    
+    const { githubUser } = response;
     return {
       isAuthenticated,
       userName: githubUser,
