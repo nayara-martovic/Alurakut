@@ -18,6 +18,7 @@ const ProfileRelationsBox = (props) => {
           );
         })}
       </ul>
+      <div className="actions"><a href={props.hrefContinue} target="_blank">Ver mais</a></div>
     </ProfileRelationsBoxWrapper>
   );
 };

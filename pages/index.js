@@ -74,11 +74,13 @@ export default function Home(props) {
             title="Seguidores"
             list={followers}
             href="/followers/"
+            hrefContinue={`https://github.com/${user.userName}?tab=followers`}
           />
           <ProfileRelationsBox
             title="Seguindo"
             list={following}
             href="/following/"
+            hrefContinue={`https://github.com/${user.userName}?tab=following`}
           />
           <ProfileRelationsBox
             title="Minhas Comunidades"
