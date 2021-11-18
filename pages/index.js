@@ -1,97 +1,61 @@
-import React from 'react';
-import MainGrid from '../src/components/MainGrid'
-import Box from '../src/components/Box'
-import { AlurakutMenu, AlurakutProfileSidebarMenuDefault, OrkutNostalgicIconSet } from '../src/lib/AlurakutCommons';
-import { ProfileRelationsBoxWrapper } from '../src/components/ProfileRelations';
+import React from "react";
+import MainGrid from "../src/components/MainGrid";
+import Box from "../src/components/Box";
+import {
+  AlurakutMenu,
+  OrkutNostalgicIconSet,
+} from "../src/lib/AlurakutCommons";
+import ProfileRelationsBox from "../src/components/ProfileRelations";
+import ProfileSidebar from "../src/components/ProfileSidebar";
+import CommunityForm from "../src/components/CommunityForm";
+import UserService from "../src/Services/UserService";
+import AuthService from "../src/Services/AuthService";
+import CommunityService from "../src/Services/CommunityService";
 
-function ProfileSidebar(props) {
-  return (
-    <Box as="aside">
-      <img src={`https://github.com/${props.githubUser}.png`} style={{ borderRadius: '8px' }} />
-      <hr />
-      <p>
-        <a className="boxLink" href={`https://github.com/${props.githubUser}`}>
-          @{props.githubUser}
-        </a>
-      </p>
-      <hr />
-      <AlurakutProfileSidebarMenuDefault />
-    </Box>
-  )
-}
-
-function ProfileRelationsBox(props){
-  return (
-    <ProfileRelationsBoxWrapper>
-      <h2 className="smallTitle">{props.title} ({props.list.length})</h2>
-      <ul>
-        {props.list.map((item) => {
-          return (
-            <li key={item.id}>
-              <a href={`${props.href}${item.title}`}>
-                <img src={item.image} />
-                <span>{item.title}</span>
-              </a>
-            </li>
-          )
-        })}
-      </ul>
-    </ProfileRelationsBoxWrapper>
-  );
-}
-
-export default function Home() {
-  const usuario = 'nayara-martovic';
-  const [comunidades, setComunidades] = React.useState([]);
-  const [seguidores, setSeguidores] = React.useState([]);
-
-  const amigos = [
-    {
-      title: 'SamukaM',
-      image: 'https://github.com/SamukaM.png'
-    },
-    {
-      title: 'omariosouto',
-      image: 'https://github.com/omariosouto.png',
-    },
-    {
-      title: 'juunegreiros',
-      image: 'https://github.com/juunegreiros.png',
-    },
-    {
-      title: 'peas',
-      image: 'https://github.com/peas.png',
-    },
-    {
-      title: 'rafaballerini',
-      image: 'https://github.com/rafaballerini.png',
-    }
-    //'marcobrunodev','felipefialho',
-  ];
+export default function Home(props) {
+  const [user, setUser] = React.useState({
+    userName: props.userName,
+    name: "",
+    imageUrl: "",
+  });
+  const [communities, setCommunities] = React.useState([]);
+  const [followers, setFollowers] = React.useState([]);
+  const [following, setFollowing] = React.useState([]);
 
   React.useEffect(() => {
-    fetch('https://api.github.com/users/nayara-martovic/followers')
-    .then(res => res.json())
-    .then(res => {
-      const jsonList = res.map(item => {
-        return {
-          title: item.login,
-          image: item.avatar_url
-        }
-      });
+    UserService.getGithubUser(user.userName).then((userData) =>
+      setUser(userData)
+    );
 
-      setSeguidores(jsonList);
-    });
+    UserService.getGithubFollowers(user.userName).then((followersData) =>
+      setFollowers(followersData)
+    );
+
+    UserService.getGithubFollowing(user.userName).then((followingData) =>
+      setFollowing(followingData)
+    );
+
+    CommunityService.getAll().then((communitiesData) =>
+      setCommunities(communitiesData)
+    );
   }, []); // o array vazio indica q o codigo sera executado apenas uma vez
+
+  const handleSubmitCommunityForm = (data) => {
+    data.creatorSlug = user.userName;
+
+    CommunityService.create(data).then((createdCommunity) => {
+      setComunidades([...comunidades, createdCommunity]);
+    });
+  };
 
   return (
     <>
       <AlurakutMenu />
       <MainGrid>
-        <div className="profileArea" style={{ gridArea: 'profileArea' }}>
-          <ProfileSidebar githubUser={usuario} />
+        <div className="profileArea" style={{ gridArea: "profileArea" }}>
+          <ProfileSidebar user={user} />
         </div>
-        <div className="welcomeArea" style={{ gridArea: 'welcomeArea' }}>
+        <div className="welcomeArea" style={{ gridArea: "welcomeArea" }}>
           <Box>
             <h1 className="title">Bem vindo(a)</h1>
             <OrkutNostalgicIconSet />
@@ -99,56 +63,49 @@ export default function Home() {
 
           <Box>
             <h2 className="subTitle">O que você deseja fazer?</h2>
-            <form onSubmit={function handleCriaComunidade(ev) {
-                ev.preventDefault();
-                const dadosDoForm = new FormData(ev.target);
-
-                const comunidade = {
-                  id: new Date().toISOString(),
-                  title: dadosDoForm.get('title'),
-                  image: dadosDoForm.get('image'),
-                }
-                const comunidadesAtualizadas = [...comunidades, comunidade];
-                setComunidades(comunidadesAtualizadas)
-            }}>
-              <div>
-                <input
-                  placeholder="Qual vai ser o nome da sua comunidade?"
-                  name="title"
-                  aria-label="Qual vai ser o nome da sua comunidade?"
-                  type="text"
-                  />
-              </div>
-              <div>
-                <input
-                  placeholder="Coloque uma URL para usarmos de capa"
-                  name="image"
-                  aria-label="Coloque uma URL para usarmos de capa"
-                />
-              </div>
-
-              <button type="submit">Criar comunidade</button>
-            </form>
+            <CommunityForm onSubmit={handleSubmitCommunityForm} />
           </Box>
         </div>
-        <div className="profileRelationsArea" style={{ gridArea: 'profileRelationsArea' }}>
-          <ProfileRelationsBox 
-            title="Meus Seguidores"
-            list={seguidores}
+        <div
+          className="profileRelationsArea"
+          style={{ gridArea: "profileRelationsArea" }}
+        >
+          <ProfileRelationsBox
+            title="Seguidores"
+            list={followers}
             href="/followers/"
           />
-          <ProfileRelationsBox 
-            title="Meus Amigos"
-            list={amigos}
-            href="/users/"
+          <ProfileRelationsBox
+            title="Seguindo"
+            list={following}
+            href="/following/"
           />
-          <ProfileRelationsBox 
+          <ProfileRelationsBox
             title="Minhas Comunidades"
-            list={comunidades}
+            list={communities}
             href="/communities/"
           />
         </div>
       </MainGrid>
     </>
-  )
+  );
+}
+
+export async function getServerSideProps(context) {
+  const { isAuthenticated, userName } = await AuthService.getAuth(context);
+
+  if (!isAuthenticated) {
+    return {
+      redirect: {
+        destination: "/login",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      userName,
+    }, // will be passed to the page component as props
+  };
 }
